@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021-2022 Matt Malec, and the Pterodactyl4J contributors
+ *    Copyright 2021-2024 Matt Malec, and the Pterodactyl4J contributors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public class CreateServerImpl extends PteroActionImpl<ApplicationServer> impleme
 	private Map<String, EnvironmentValue<?>> environment;
 	private Set<Location> locations;
 	private Set<Integer> portRange;
+	private Set<String> categories;
 	private boolean useDedicatedIP;
 	private boolean startOnCompletion;
 	private boolean skipScripts;
@@ -107,6 +108,12 @@ public class CreateServerImpl extends PteroActionImpl<ApplicationServer> impleme
 	@Override
 	public ServerCreationAction setMemory(long amount, DataType dataType) {
 		this.memory = convert(amount, dataType);
+		return this;
+	}
+
+	@Override
+	public ServerCreationAction setCategories(Set<String> categories) {
+		this.categories = categories;
 		return this;
 	}
 
@@ -229,6 +236,7 @@ public class CreateServerImpl extends PteroActionImpl<ApplicationServer> impleme
 						allocations == 0 && additionalAllocations != null
 								? additionalAllocations.size() + 1
 								: allocations)
+				.put("categories", categories != null ? categories : new JSONObject())
 				.put("backups", backups);
 		JSONObject limits = new JSONObject()
 				.put("memory", memory)
@@ -274,6 +282,7 @@ public class CreateServerImpl extends PteroActionImpl<ApplicationServer> impleme
 				.put("deploy", (locations != null || portRange != null) ? deploy : null)
 				.put("allocation", allocation)
 				.put("start_on_completion", startOnCompletion)
+				.put("categories", categories != null ? categories : new JSONObject())
 				.put("skip_scripts", skipScripts);
 		return getRequestBody(obj);
 	}
